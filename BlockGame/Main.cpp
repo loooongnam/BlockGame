@@ -2,91 +2,71 @@
 #include <sstream>
 #include <raylib-cpp.hpp>
 
-#define SCREEN_WIDTH 960
-#define SCREEN_HEIGHT 540
-#define WINDOW_TITLE "Block Game"
+void DrawTiles(int x, int y, int width, int height, int numberOfTiles);
+void DrawBlockPoints(int x, int y);
 
-float moveSpeed = 0.1f;
-int moveSide;
-int moveFD;
-raylib::Vector2 playerPos = { (SCREEN_WIDTH / 2) - 50, (SCREEN_HEIGHT / 2) - 50 };
-std::stringstream s;
+struct App
+{
+	int _width;
+	void CreateWindow(int width, int height, std::string title, ConfigFlags flags)
+	{
+		InitWindow(width, height, title.c_str());
+		SetWindowState(flags);
+	}
 
-bool InitWindow(int width, int height, std::string title, ConfigFlags flags);
-void HandleInput();
-void UpdatePosition();
-void ChangeSpeed(float value);
-void CheckPlayerPosToMoveBack();
+	void DestroyWindow()
+	{
+		CloseWindow();
+	}
+};
+
+struct Game
+{
+	void Run()
+	{
+		while (!WindowShouldClose())
+		{
+			BeginDrawing();
+			ClearBackground(RAYWHITE);
+			DrawText("Score: ", 17, 15, 20, DARKGRAY);
+			DrawRectangleRounded(raylib::Rectangle(3, 5, 533, 40), 1.0f, 10, ColorAlpha(DARKBROWN, 0.4f));
+			DrawRectangleRounded(raylib::Rectangle(13, 57, 513, 487), 0.05f, 10, ColorAlpha(BROWN, 0.8f));
+			DrawRectangleRoundedLines(raylib::Rectangle(13, 57, 513, 487), 0.05f, 10, 8, ColorAlpha(BROWN, 1.0f));
+			DrawTiles(40, 80, 140, 130, 160*3);
+			DrawBlockPoints(93, 120);
+			EndDrawing();
+		}
+	}
+};
 
 int main(void)
 {
-	if (!InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, WINDOW_TITLE, FLAG_WINDOW_RESIZABLE)) std::cout << "Window Initialization Failed" << std::endl;
-	while (!WindowShouldClose())
+	App app;
+	Game game;
+
+	app.CreateWindow(540, 560, "2048", FLAG_WINDOW_ALWAYS_RUN);
+	game.Run();
+	app.DestroyWindow();
+}
+
+void DrawTiles(int x, int y, int width, int height, int numberOfTiles)
+{
+	for (int i = x; i < numberOfTiles; i += 160)
 	{
-		HandleInput();
-		BeginDrawing();
-		ClearBackground(RAYWHITE);
-		DrawFPS(10, 10);
-		s << "X: ";
-		s << playerPos.x;
-		DrawText(s.str().c_str(), 10, 45, 20, DARKGRAY);
-		s.str("");
-		s << "Y: ";
-		s << playerPos.y;
-		DrawText(s.str().c_str(), 10, 70, 20, DARKGRAY);
-		s.str("");
-		s << "Speed: ";
-		s << moveSpeed;
-		DrawText(s.str().c_str(), 10, 110, 20, DARKGRAY);
-		s.str("");
-		CheckPlayerPosToMoveBack();
-		DrawRectangleV(playerPos, raylib::Vector2(100, 100), RED);
-		EndDrawing();
+		for (int j = y; j < numberOfTiles; j += 155)
+		{
+			DrawRectangleRounded(raylib::Rectangle(i, j, width, height), 0.1f, 10, ColorAlpha(BROWN, 1.0f));
+		}
 	}
-	CloseWindow();
 }
 
-bool InitWindow(int width, int height, std::string title, ConfigFlags flags)
+void DrawBlockPoints(int x, int y)
 {
-	raylib::InitWindow(width, height, title);
-	SetWindowState(flags);
-	return true;
-}
-
-void HandleInput()
-{
-	if (IsKeyDown(KEY_A)) moveSide = -1;
-	if (IsKeyDown(KEY_D)) moveSide = 1;
-	if (IsKeyDown(KEY_W)) moveFD = -1;
-	if (IsKeyDown(KEY_S)) moveFD = 1;
-	UpdatePosition();
-
-	if (IsKeyPressed(KEY_UP)) ChangeSpeed(0.1f);
-	if (IsKeyPressed(KEY_DOWN)) ChangeSpeed(-0.1f);
-}
-
-void UpdatePosition()
-{
-	if (moveSide == 1) playerPos.x += moveSpeed;
-	if (moveSide == -1) playerPos.x -= moveSpeed;
-	if (moveFD == 1) playerPos.y += moveSpeed;
-	if (moveFD == -1) playerPos.y -= moveSpeed;
-
-	moveSide = 0;
-	moveFD = 0;
-}
-
-void ChangeSpeed(float value)
-{
-	moveSpeed += value;
-	if (moveSpeed < 0.1f) moveSpeed = 0.1f;
-	if (moveSpeed > 2.0f) moveSpeed = 2.0f;
-}
-
-void CheckPlayerPosToMoveBack()
-{
-	if (playerPos.x > SCREEN_WIDTH) playerPos.x = -100;
-	if (playerPos.x < -100) playerPos.x = SCREEN_WIDTH;
-	if (playerPos.y > SCREEN_HEIGHT) playerPos.y = -100;
-	if (playerPos.y < -100) playerPos.y = SCREEN_HEIGHT;
+	for (int i = x; i < 1000; i += 161)
+	{
+		for (int j = y; j < 1000; j += 155)
+		{
+			DrawText("2", i, j, 60, DARKGRAY);
+		}
+	}
 }
